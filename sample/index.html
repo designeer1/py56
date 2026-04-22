@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Development Agreement Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        :root {
+            --color-primary: #2d5f6d;
+            --color-primary-hover: #1a3a4a;
+            --color-secondary: #e8f4f8;
+            --color-text: #1a3a4a;
+            --color-text-light: #666;
+            --color-border: #ddd;
+            --color-success: #27ae60;
+            --color-bg: #f9f9f9;
+            --color-white: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--color-text);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: var(--color-white);
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 40px;
+        }
+
+        .form-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--color-text);
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            padding: 12px;
+            border: 2px solid var(--color-border);
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 8px rgba(45, 95, 109, 0.2);
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--color-primary);
+            border-bottom: 3px solid var(--color-primary);
+            padding-bottom: 12px;
+            margin-top: 20px;
+            margin-bottom: 15px;
+        }
+
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid var(--color-border);
+        }
+
+        button {
+            padding: 14px 28px;
+            font-size: 15px;
+            font-weight: 600;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex: 1;
+        }
+
+        .btn-primary {
+            background: var(--color-primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--color-primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(45, 95, 109, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--color-secondary);
+            color: var(--color-primary);
+        }
+
+        .btn-secondary:hover {
+            background: #d4e8f0;
+        }
+
+        .preview-section {
+            background: var(--color-bg);
+            border-radius: 12px;
+            padding: 30px;
+            border: 2px solid var(--color-border);
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .preview-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--color-primary);
+            margin-bottom: 20px;
+        }
+
+        #pdfPreview {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            line-height: 1.6;
+            font-size: 12px;
+        }
+
+        .agreement-header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--color-primary);
+            padding-bottom: 15px;
+        }
+
+        .agreement-header h2 {
+            font-size: 16px;
+            color: var(--color-primary);
+            margin-bottom: 8px;
+        }
+
+        .agreement-date {
+            font-size: 11px;
+            color: var(--color-text-light);
+            margin-bottom: 15px;
+        }
+
+        .section {
+            margin-bottom: 15px;
+        }
+
+        .section-heading {
+            font-weight: 700;
+            color: var(--color-primary);
+            margin-bottom: 8px;
+            font-size: 12px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+            font-size: 11px;
+        }
+
+        table th {
+            background: var(--color-primary);
+            color: white;
+            padding: 8px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        table td {
+            border: 1px solid var(--color-border);
+            padding: 8px;
+        }
+
+        table tr:nth-child(even) {
+            background: var(--color-secondary);
+        }
+
+        .success-message {
+            display: none;
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+            border: 1px solid #c3e6cb;
+            text-align: center;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        @media (max-width: 1024px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+
+            .preview-section {
+                max-height: none;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--color-bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--color-primary);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>💼 Web Development Agreement</h1>
+            <p>Generate and Download Professional PDF Agreement</p>
+        </header>
+
+        <div class="content">
+            <!-- Form Section -->
+            <div class="form-section">
+                <form id="agreementForm">
+                    <!-- Client Details -->
+                    <div class="section-title">👤 Client Details</div>
+                    
+                    <div class="form-group">
+                        <label for="clientName">Client Name *</label>
+                        <input type="text" id="clientName" name="clientName" required placeholder="Enter client full name">
+                    </div>
+
+                    <div class="two-column">
+                        <div class="form-group">
+                            <label for="clientAadhar">Aadhar Number *</label>
+                            <input type="text" id="clientAadhar" name="clientAadhar" required placeholder="e.g., 1234 5678 9012">
+                        </div>
+                        <div class="form-group">
+                            <label for="clientMobile">Mobile Number *</label>
+                            <input type="tel" id="clientMobile" name="clientMobile" required placeholder="e.g., 9876543210">
+                        </div>
+                    </div>
+
+                    <!-- Builder 1 Details -->
+                    <div class="section-title">👨‍💼 Service Provider (Builder) 1</div>
+
+                    <div class="form-group">
+                        <label for="builder1Name">Name *</label>
+                        <input type="text" id="builder1Name" name="builder1Name" value="H S Nasir Basha" required>
+                    </div>
+
+                    <div class="two-column">
+                        <div class="form-group">
+                            <label for="builder1Aadhar">Aadhar Number *</label>
+                            <input type="text" id="builder1Aadhar" name="builder1Aadhar" value="880380764845" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="builder1Mobile">Mobile Number *</label>
+                            <input type="tel" id="builder1Mobile" name="builder1Mobile" value="7396080903" required>
+                        </div>
+                    </div>
+
+                    <!-- Builder 2 Details (Optional) -->
+                    <div class="section-title">👨‍💼 Service Provider (Builder) 2 (Optional)</div>
+
+                    <div class="form-group">
+                        <label for="builder2Name">Name</label>
+                        <input type="text" id="builder2Name" name="builder2Name" placeholder="Leave empty if not needed">
+                    </div>
+
+                    <div class="two-column">
+                        <div class="form-group">
+                            <label for="builder2Aadhar">Aadhar Number</label>
+                            <input type="text" id="builder2Aadhar" name="builder2Aadhar" placeholder="Optional">
+                        </div>
+                        <div class="form-group">
+                            <label for="builder2Mobile">Mobile Number</label>
+                            <input type="tel" id="builder2Mobile" name="builder2Mobile" placeholder="Optional">
+                        </div>
+                    </div>
+
+                    <!-- Project Details -->
+                    <div class="section-title">📋 Project Details</div>
+
+                    <div class="two-column">
+                        <div class="form-group">
+                            <label for="projectBudget">Project Budget (Rs) *</label>
+                            <input type="number" id="projectBudget" name="projectBudget" value="30000" required min="1000">
+                        </div>
+                        <div class="form-group">
+                            <label for="completionDate">Completion Date *</label>
+                            <input type="text" id="completionDate" name="completionDate" value="Jan 20, 2026" required placeholder="e.g., Jan 20, 2026">
+                        </div>
+                    </div>
+
+                    <div class="button-group">
+                        <button type="button" class="btn-secondary" onclick="resetForm()">🔄 Reset</button>
+                        <button type="button" class="btn-primary" onclick="generatePreview()">👁️ Preview</button>
+                        <button type="button" class="btn-primary" onclick="downloadPDF()">📥 Download PDF</button>
+                    </div>
+
+                    <div class="success-message" id="successMessage">
+                        ✅ PDF generated successfully! Check your downloads folder.
+                    </div>
+                </form>
+            </div>
+
+            <!-- Preview Section -->
+            <div class="preview-section">
+                <div class="preview-title">📄 Agreement Preview</div>
+                <div id="pdfPreview" style="display:none;">
+                    <div class="agreement-header">
+                        <h2>WEB DEVELOPMENT SERVICE AGREEMENT</h2>
+                        <div class="agreement-date" id="agreementDate"></div>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-heading">1. PARTIES TO THE AGREEMENT</div>
+                        <table>
+                            <tr>
+                                <th>Service Provider (Builder)</th>
+                                <th>Client</th>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <strong>Name:</strong> <span id="previewBuilder1Name"></span><br>
+                                    <strong>Aadhar:</strong> <span id="previewBuilder1Aadhar"></span><br>
+                                    <strong>Mobile:</strong> <span id="previewBuilder1Mobile"></span>
+                                </td>
+                                <td>
+                                    <strong>Name:</strong> <span id="previewClientName"></span><br>
+                                    <strong>Aadhar:</strong> <span id="previewClientAadhar"></span><br>
+                                    <strong>Mobile:</strong> <span id="previewClientMobile"></span>
+                                </td>
+                            </tr>
+                        </table>
+                        <div id="builder2Section"></div>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-heading">2. PROJECT SCOPE & DELIVERABLES</div>
+                        <p><strong>Description:</strong> Complete Website Development including design, frontend development, backend integration, database setup, and deployment on live server.</p>
+                        <p><strong>Deliverables Include:</strong></p>
+                        <ul style="margin-left: 15px;">
+                            <li>Responsive Website Design</li>
+                            <li>Frontend Development (HTML5, CSS3, JavaScript/React)</li>
+                            <li>Backend Development (Python Flask/Django)</li>
+                            <li>PostgreSQL Database Design & Implementation</li>
+                            <li>Website Testing & Quality Assurance</li>
+                            <li>Deployment & Server Configuration</li>
+                            <li>Documentation & Code Handover</li>
+                        </ul>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-heading">3. PROJECT BUDGET & PAYMENT SCHEDULE</div>
+                        <table>
+                            <tr>
+                                <th>Description</th>
+                                <th>Amount</th>
+                                <th>Due Date</th>
+                                <th>Status</th>
+                            </tr>
+                            <tr>
+                                <td><strong>Total Project Budget</strong></td>
+                                <td id="previewBudget"></td>
+                                <td>-</td>
+                                <td>-</td>
+                            </tr>
+                            <tr>
+                                <td colspan="4"><strong>INSTALLMENT SCHEDULE:</strong></td>
+                            </tr>
+                            <tr>
+                                <td>1st Installment (Project Start)</td>
+                                <td id="installment1"></td>
+                                <td>Jan 1, 2026</td>
+                                <td>Upon Signing</td>
+                            </tr>
+                            <tr>
+                                <td>2nd Installment (Mid-Project)</td>
+                                <td id="installment2"></td>
+                                <td>Feb 1, 2026</td>
+                                <td>50% Completion</td>
+                            </tr>
+                            <tr>
+                                <td>3rd Installment (Final)</td>
+                                <td id="installment3"></td>
+                                <td>Mar 1, 2026</td>
+                                <td>On Delivery</td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-heading">4. TERMS & CONDITIONS</div>
+                        <p><strong>4.1 Payment Terms:</strong> Payment must be made via bank transfer or cheque. Late payments may result in project suspension.</p>
+                        <p><strong>4.2 Project Timeline:</strong> The project is committed to be completed and delivered by <span id="previewCompletionDate"></span>.</p>
+                        <p><strong>4.3 Revision Policy:</strong> Unlimited revisions are included during development. Additional revisions post-delivery will be charged separately.</p>
+                        <p><strong>4.4 Intellectual Property:</strong> Upon final payment, all rights to the website, code, and design will be transferred to the client.</p>
+                        <p><strong>4.5 Support & Maintenance:</strong> 3 months of free post-deployment support is included. Extended support available at additional cost.</p>
+                        <p><strong>4.6 Liability:</strong> The service provider is not liable for data loss due to client-side mishandling or third-party hosting failures.</p>
+                        <p><strong>4.7 Termination:</strong> Either party may terminate with written notice. Partial payments are non-refundable for completed work.</p>
+                        <p><strong>4.8 Confidentiality:</strong> Both parties agree to maintain confidentiality regarding project details and business information.</p>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-heading">5. SIGNATURES & AGREEMENT</div>
+                        <p>By signing below, both parties agree to abide by the terms and conditions outlined in this agreement.</p>
+                        <table style="margin-top: 30px;">
+                            <tr>
+                                <td style="text-align: center; height: 60px; border: none;"><strong>For Service Provider:</strong></td>
+                                <td style="text-align: center; height: 60px; border: none;"><strong>For Client:</strong></td>
+                            </tr>
+                            <tr>
+                                <td style="border-top: 1px solid black; text-align: center;"><strong>Signature</strong></td>
+                                <td style="border-top: 1px solid black; text-align: center;"><strong>Signature</strong></td>
+                            </tr>
+                            <tr>
+                                <td style="text-align: center;">Date: ___________</td>
+                                <td style="text-align: center;">Date: ___________</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function generatePreview() {
+            const form = document.getElementById('agreementForm');
+            
+            if (!form.checkValidity()) {
+                alert('Please fill in all required fields (*) first!');
+                return;
+            }
+
+            const data = {
+                clientName: document.getElementById('clientName').value,
+                clientAadhar: document.getElementById('clientAadhar').value,
+                clientMobile: document.getElementById('clientMobile').value,
+                builder1Name: document.getElementById('builder1Name').value,
+                builder1Aadhar: document.getElementById('builder1Aadhar').value,
+                builder1Mobile: document.getElementById('builder1Mobile').value,
+                builder2Name: document.getElementById('builder2Name').value,
+                builder2Aadhar: document.getElementById('builder2Aadhar').value,
+                builder2Mobile: document.getElementById('builder2Mobile').value,
+                projectBudget: parseInt(document.getElementById('projectBudget').value),
+                completionDate: document.getElementById('completionDate').value
+            };
+
+            // Update agreement date
+            const today = new Date();
+            const dateStr = today.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            document.getElementById('agreementDate').textContent = `Agreement Date: ${dateStr}`;
+
+            // Update client details
+            document.getElementById('previewClientName').textContent = data.clientName;
+            document.getElementById('previewClientAadhar').textContent = data.clientAadhar;
+            document.getElementById('previewClientMobile').textContent = data.clientMobile;
+
+            // Update builder 1 details
+            document.getElementById('previewBuilder1Name').textContent = data.builder1Name;
+            document.getElementById('previewBuilder1Aadhar').textContent = data.builder1Aadhar;
+            document.getElementById('previewBuilder1Mobile').textContent = data.builder1Mobile;
+
+            // Add builder 2 if provided
+            const builder2Section = document.getElementById('builder2Section');
+            if (data.builder2Name.trim()) {
+                builder2Section.innerHTML = `
+                    <p style="margin-top: 10px;">
+                        <strong>Builder 2:</strong><br>
+                        Name: ${data.builder2Name}<br>
+                        Aadhar: ${data.builder2Aadhar}<br>
+                        Mobile: ${data.builder2Mobile}
+                    </p>
+                `;
+            } else {
+                builder2Section.innerHTML = '';
+            }
+
+            // Calculate installments
+            const inst1 = Math.floor(data.projectBudget / 3);
+            const inst2 = Math.floor(data.projectBudget / 3);
+            const inst3 = data.projectBudget - inst1 - inst2;
+
+            document.getElementById('previewBudget').textContent = `₹ ${data.projectBudget.toLocaleString()}`;
+            document.getElementById('installment1').textContent = `₹ ${inst1.toLocaleString()}`;
+            document.getElementById('installment2').textContent = `₹ ${inst2.toLocaleString()}`;
+            document.getElementById('installment3').textContent = `₹ ${inst3.toLocaleString()}`;
+            document.getElementById('previewCompletionDate').textContent = data.completionDate;
+
+            // Show preview
+            document.getElementById('pdfPreview').style.display = 'block';
+        }
+
+        function downloadPDF() {
+            const preview = document.getElementById('pdfPreview');
+            
+            if (preview.style.display === 'none') {
+                alert('Please generate preview first!');
+                return;
+            }
+
+            const element = document.getElementById('pdfPreview');
+            const opt = {
+                margin: 10,
+                filename: 'Web_Development_Agreement.pdf',
+                image: {type: 'jpeg', quality: 0.98},
+                html2canvas: {scale: 2},
+                jsPDF: {orientation: 'portrait', unit: 'mm', format: 'a4'}
+            };
+
+            html2pdf().set(opt).from(element).save().then(() => {
+                document.getElementById('successMessage').classList.add('show');
+                setTimeout(() => {
+                    document.getElementById('successMessage').classList.remove('show');
+                }, 3000);
+            });
+        }
+
+        function resetForm() {
+            document.getElementById('agreementForm').reset();
+            document.getElementById('pdfPreview').style.display = 'none';
+            document.getElementById('builder1Name').value = 'H S Nasir Basha';
+            document.getElementById('builder1Aadhar').value = '880380764845';
+            document.getElementById('builder1Mobile').value = '7396080903';
+            document.getElementById('projectBudget').value = '30000';
+            document.getElementById('completionDate').value = 'Jan 20, 2026';
+        }
+
+        // Initialize with default values
+        window.addEventListener('load', () => {
+            document.getElementById('builder1Name').value = 'H S Nasir Basha';
+            document.getElementById('builder1Aadhar').value = '880380764845';
+            document.getElementById('builder1Mobile').value = '7396080903';
+            document.getElementById('projectBudget').value = '30000';
+            document.getElementById('completionDate').value = 'Jan 20, 2026';
+        });
+    </script>
+</body>
+</html>
+New Text Document.txt
+Displaying New Text Document.txt.
